@@ -370,11 +370,12 @@ function init3D() {
   if(loadingMsg) loadingMsg.remove();
   container.appendChild(renderer.domElement);
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+    // Luces mejoradas para asegurar visibilidad
+  const ambientLight = new THREE.AmbientLight(0xffffff, 3.0); // Mucha más luz ambiental
   scene.add(ambientLight);
   
   const keyLight = new THREE.DirectionalLight(0xffffff, 2);
-  keyLight.position.set(2, 3, 4);
+  keyLight.position.set(5, 5, 5);
   scene.add(keyLight);
   
   const fillLight = new THREE.DirectionalLight(0xffccaa, 1.5);
@@ -401,14 +402,9 @@ function init3D() {
 
     camera.position.z = 3.5; 
 
-    object.traverse((child) => {
+        object.traverse((child) => {
       if (child.isMesh) {
-        child.material = new THREE.MeshStandardMaterial({
-          color: 0xebbfae, 
-          roughness: 0.6,
-          metalness: 0.1,
-          side: THREE.DoubleSide
-        });
+        child.material = new THREE.MeshNormalMaterial(); // <-- Prueba temporal
       }
     });
 
