@@ -60,6 +60,24 @@ h2{font-size:1.15rem;margin:20px 0 8px}
 #fig {flex: 1.6; width: 100%;height: 100%;object-fit: contain;}
 #webgl-container {flex: 0.9; display: flex;justify-content: center;align-items: center; min-height: 400px;}
 
+/* Asegurar que el canvas de Three.js esté por encima del mensaje de carga */
+#webgl-container canvas {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100% !important;
+    height: 100% !important;
+    z-index: 1;
+}
+#loading-msg {
+    position: absolute;
+    z-index: 0;
+    color: var(--mute);
+    font-size: 0.9rem;
+    text-align: center;
+    padding: 20px;
+}
+
 @media(max-width:760px){
   .fig-wrap{flex-direction:column; height: 650px;}
   #fig { flex: 1; width:100%; aspect-ratio: auto;}
@@ -99,7 +117,7 @@ h2{font-size:1.15rem;margin:20px 0 8px}
       <div class="fig-wrap">
         <svg class="fig" id="fig" viewBox="0 0 320 380" role="img" aria-label="Esquema del cuello"></svg>
         <div id="webgl-container" role="img" aria-label="Modelo 3D realista de la cabeza y cuello">
-            <div id="loading-msg" style="position:absolute; color:var(--mute); font-size:0.9rem;">Cargando modelo 3D...</div>
+            <div id="loading-msg">Cargando modelo 3D...</div>
         </div>
       </div>
       <p class="cap" id="cap"></p>
@@ -147,6 +165,15 @@ h2{font-size:1.15rem;margin:20px 0 8px}
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
 
+// ===== VARIABLES GLOBALES Y ESTADO =====
+// Nota: Se define 'hk' aquí arriba para evitar errores de referencia en poseSummary()
+let hk = "rot"; 
+let mv = "flex", side = "der";
+let scene, camera, renderer, headPivot;
+let modelLoaded = false;
+const container = document.getElementById('webgl-container');
+const loadingMsg = document.getElementById('loading-msg');
+
 const MOV={
 flex:{n:"Flexión (mentón al pecho)",v:"side",max:35,cap:"Vista lateral. La cara mira a la derecha. (Limitado a 35° por anterolistesis C2-C4)"},
 ext:{n:"Extensión (mirar arriba)",v:"side",max:50,cap:"Vista lateral. La cara mira a la derecha."},
@@ -166,7 +193,6 @@ const S=[
 ];
 
 const TAG=["Poco cambio","Estiramiento o carga","Posible estrechamiento o compromiso teórico"];
-let mv="flex",side="der";
 const $=id=>document.getElementById(id);
 const SN={der:"derecho",izq:"izquierdo"};
 const AX={fe:{n:"Flexión / extensión",l:"Extensión",r:"Flexión"},prot:{n:"Traslación anterior / retracción",l:"Retracción",r:"Adelantamiento"},rot:{n:"Rotación axial",l:"Izquierda",r:"Derecha"},tilt:{n:"Inclinación lateral",l:"Izquierda",r:"Derecha"}};
@@ -297,49 +323,52 @@ function poseSummary(){
 const p=[];
 if(V0.fe>0)p.push("flexión");else if(V0.fe<0)p.push("extensión");
 if(V0.prot>0)p.push("adelantamiento");else if(V0.prot<0)p.push("retracción");
-// Nota: hk se define más abajo, pero como poseSummary se llama en render(), ya está definido.
+// hk ahora está definido globalmente al inicio del script
 if(V0[hk]>0)p.push(hk==="rot"?"rotación derecha":"inclinación derecha");else if(V0[hk]<0)p.push(hk==="rot"?"rotación izquierda":"inclinación izquierda");
 return p.length?"Movimiento seleccionado: "+p.join(" + ")+".":"Posición neutra.";
 }
 
 // ===== SETUP DE THREE.JS (MOTOR 3D) =====
-let scene, camera, renderer, headPivot;
-let modelLoaded = false;
-const container = document.getElementById('webgl-container');
-
 function init3D() {
   scene = new THREE.Scene();
-  scene.background = new THREE.Color(0xeaf0f2);
+  // Usar un color de fondo transparente o que combine con el tema
+  scene.background = new THREE.Color(0xeaf0f2); 
 
   camera = new THREE.PerspectiveCamera(45, container.clientWidth / container.clientHeight, 0.1, 1000);
-  camera.position.set(0, 0, 4.0);
+  // Posicionar la cámara un poco más atrás para asegurar que el modelo quepa
+  camera.position.set(0, 0, 5.0); 
 
   renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
   renderer.setSize(container.clientWidth, container.clientHeight);
   renderer.setPixelRatio(window.devicePixelRatio);
   renderer.outputColorSpace = THREE.SRGBColorSpace;
   
-  const loadingMsg = document.getElementById('loading-msg');
+  // Ocultar mensaje de carga inicial
   if(loadingMsg) loadingMsg.style.display = 'block';
   container.appendChild(renderer.domElement);
 
-  const ambientLight = new THREE.AmbientLight(0xffffff, 1.5);
+  // Iluminación mejorada
+  const ambientLight = new THREE.AmbientLight(0xffffff, 1.2);
   scene.add(ambientLight);
   
-  const keyLight = new THREE.DirectionalLight(0xffffff, 2.0);
-  keyLight.position.set(3, 5, 5);
+  const keyLight = new THREE.DirectionalLight(0xffffff, 2.5);
+  keyLight.position.set(5, 5, 5);
   scene.add(keyLight);
   
-  const fillLight = new THREE.DirectionalLight(0xffffff, 1.0);
-  fillLight.position.set(-3, 0, 3);
+  const fillLight = new THREE.DirectionalLight(0xffffff, 1.5);
+  fillLight.position.set(-5, 0, 5);
   scene.add(fillLight);
+
+  const backLight = new THREE.DirectionalLight(0xffffff, 0.8);
+  backLight.position.set(0, -5, -5);
+  scene.add(backLight);
 
   headPivot = new THREE.Group();
   scene.add(headPivot);
 
   const loader = new OBJLoader();
   
-  // SOLUCIÓN CLAVE: Ruta absoluta para GitHub Pages, relativa para local
+  // Ruta robusta para GitHub Pages y local
   const isGitHubPages = window.location.hostname.includes('github.io');
   const modelUrl = isGitHubPages 
     ? 'https://dbettancourt.github.io/visor-cervical-personalizado/Person002_wrap.obj?v=2' 
@@ -348,27 +377,33 @@ function init3D() {
   console.log("Intentando cargar modelo desde:", modelUrl);
 
   loader.load(modelUrl, (object) => {
-    if(loadingMsg) loadingMsg.remove();
+    // Ocultar mensaje de carga en lugar de eliminarlo (más seguro)
+    if(loadingMsg) loadingMsg.style.display = 'none';
     
-    const box = new THREE.Box3().setFromObject(object);
-    const center = box.getCenter(new THREE.Vector3());
-    const size = box.getSize(new THREE.Vector3());
-
-    // Centrar el objeto correctamente en el origen
-    object.position.sub(center);
-
-    // Escalar para que quepa bien en la vista
-    const maxDim = Math.max(size.x, size.y, size.z);
-    const scaleFactor = 2.5 / maxDim;
+    // --- CORRECCIÓN CRÍTICA DE ESCALADO Y CENTRADO ---
+    // 1. Escalar primero
+    const boxInit = new THREE.Box3().setFromObject(object);
+    const sizeInit = boxInit.getSize(new THREE.Vector3());
+    const maxDim = Math.max(sizeInit.x, sizeInit.y, sizeInit.z);
+    const scaleFactor = 2.5 / maxDim; // Ajusta este 2.5 si el modelo se ve muy grande/pequeño
     object.scale.setScalar(scaleFactor);
 
+    // 2. Recalcular caja con el nuevo tamaño
+    const boxScaled = new THREE.Box3().setFromObject(object);
+    const centerScaled = boxScaled.getCenter(new THREE.Vector3());
+
+    // 3. Centrar el objeto restando el nuevo centro
+    object.position.sub(centerScaled);
+    // --------------------------------------------------
+
+    // Aplicar material
     object.traverse((child) => {
       if (child.isMesh) {
         child.material = new THREE.MeshStandardMaterial({
           color: 0xebbfae, 
           roughness: 0.6,
           metalness: 0.1,
-          side: THREE.DoubleSide
+          side: THREE.DoubleSide // Útil si el modelo tiene caras abiertas
         });
       }
     });
@@ -378,16 +413,17 @@ function init3D() {
     console.log("✅ Modelo 3D cargado exitosamente.");
   }, 
   (xhr) => {
-    if (xhr.total !== 0) {
+    if (xhr.total !== 0 && loadingMsg) {
       const percent = (xhr.loaded / xhr.total * 100).toFixed(0);
-      if(loadingMsg) loadingMsg.textContent = `Cargando modelo 3D... ${percent}%`;
+      loadingMsg.textContent = `Cargando modelo 3D... ${percent}%`;
     }
   },
   (err) => {
     console.error("❌ Error cargando el modelo .obj: ", err);
-    if(loadingMsg) loadingMsg.remove();
+    if(loadingMsg) loadingMsg.style.display = 'none';
+    
     const errorDiv = document.createElement('div');
-    errorDiv.style.cssText = 'color: var(--cmp); padding: 20px; text-align: center; font-size: 0.9rem; background: var(--cmpbg); border-radius: 8px; margin: 10px;';
+    errorDiv.style.cssText = 'color: var(--cmp); padding: 20px; text-align: center; font-size: 0.9rem; background: var(--cmpbg); border-radius: 8px; margin: 10px; position:absolute; z-index:2;';
     errorDiv.innerHTML = `<b>Error al cargar el modelo 3D</b><br>URL intentada: <code style="font-size:0.8em;word-break:break-all;">${modelUrl}</code><br>Verifica que el archivo <i>Person002_wrap.obj</i> está en la raíz del repositorio.`;
     container.appendChild(errorDiv);
   });
@@ -407,6 +443,7 @@ function animate() {
   requestAnimationFrame(animate);
   
   if (modelLoaded && headPivot) {
+    // Suavizado de rotaciones basado en los valores de V0
     const targetRotY = (V0.rot / 100) * (Math.PI / 3); 
     headPivot.rotation.y += (targetRotY - headPivot.rotation.y) * 0.1; 
 
@@ -423,9 +460,10 @@ function animate() {
   if(renderer) renderer.render(scene, camera);
 }
 
+// Iniciar el motor 3D
 init3D();
 
-// ===== RESTO DE LA LÓGICA DE LA INTERFAZ =====
+// ===== LÓGICA DE LA INTERFAZ Y RENDERIZADO SVG =====
 function render(){
 const kk=1,A=acts();syncPad();
 for(const k in AX){const v=V0[k],o=$("o_"+k);
@@ -447,9 +485,12 @@ if(first||s>b.s||(s===b.s&&x.a>b.a)){first=false;const I=SN[x.side],C=SN[x.side=
 return{i,n,...b}}).sort((x,y)=>y.s-x.s);
 const big=A.some(x=>x.a>=40);
 bodyMap(rows);$("out").innerHTML=(SED()&&big?`<p class="cap">Con hipermovilidad, la respuesta de ligamentos, músculos y articulaciones puede variar. Esta advertencia no confirma inestabilidad ni compresión.</p>`:"")+(A.length>1?`<p class="cap">Al combinar movimientos la carga puede cambiar, pero este modelo no calcula la interacción tridimensional. Cada fila muestra el nivel programado más alto entre los movimientos seleccionados por separado.</p>`:"")+rows.map(r=>`<div class="s s${r.s}"><h3><span><b class="bd">${r.i+1}</b>${r.n}</span><span class="tag">${TAG[r.s]}</span></h3><p>${!A.length||(r.s===0&&r.a<20)?"Cerca de la posición neutra: poca carga.":(A.length>1?`<b>${r.m}:</b> `:"")+r.t}</p></div>`).join("");}
+
+// Event Listeners
 $("sl").addEventListener("input",e=>{const k=e.target.dataset.k;if(k){V0[k]=+e.target.value;focus=k;render();}});
 $("sl").addEventListener("click",e=>{if(e.target.id==="rs"){for(const k in V0){V0[k]=0;$("r_"+k).value=0}focus="fe";render();}});
-let hk="rot",drag=false;
+
+let drag=false;
 function syncPad(){$("dot").style.left=(50+V0[hk]/2)+"%";$("dot").style.top=(50+V0.fe/2)+"%";for(const k in V0){const e=$("r_"+k);if(e)e.value=V0[k];}}
 function padSet(e){const r=$("pad").getBoundingClientRect(),cl=v=>Math.max(-100,Math.min(100,Math.round(v)));
 const x=cl(((e.clientX-r.left)/r.width-.5)*200),y=cl(((e.clientY-r.top)/r.height-.5)*200);
