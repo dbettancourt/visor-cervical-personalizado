@@ -456,10 +456,10 @@ function animate() {
     const targetRotZ = (V0.tilt / 100) * -(Math.PI / 5); 
     headPivot.rotation.z += (targetRotZ - headPivot.rotation.z) * 0.1;
 
-    const targetRotX = (V0.fe / 100) * -(Math.PI / 5);
+    const targetRotX = (V0.fe / 100) * (Math.PI / 5); // fe<0 = extensión -> la cara sube
     headPivot.rotation.x += (targetRotX - headPivot.rotation.x) * 0.1;
 
-    const targetPosZ = (V0.prot / 100) * -0.2;
+    const targetPosZ = (V0.prot / 100) * 0.2; // adelantamiento -> hacia la cámara
     headPivot.position.z += (targetPosZ - headPivot.position.z) * 0.1;
   }
 
