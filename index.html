@@ -164,6 +164,7 @@ h2{font-size:1.15rem;margin:20px 0 8px}
 <script type="module">
 import * as THREE from 'three';
 import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 
 // ===== VARIABLES GLOBALES Y ESTADO =====
 // Nota: Se define 'hk' aquí arriba para evitar errores de referencia en poseSummary()
@@ -399,11 +400,16 @@ function init3D() {
     // Aplicar material
     object.traverse((child) => {
       if (child.isMesh) {
+        // Recalcular normales: sin ellas el modelo se ve plano (solo silueta)
+        child.geometry.deleteAttribute('normal');
+        child.geometry = mergeVertices(child.geometry, 1e-4);
+        child.geometry.computeVertexNormals();
         child.material = new THREE.MeshStandardMaterial({
           color: 0xebbfae, 
           roughness: 0.6,
           metalness: 0.1,
-          side: THREE.DoubleSide // Útil si el modelo tiene caras abiertas
+          side: THREE.DoubleSide, // Útil si el modelo tiene caras abiertas
+          flatShading: false
         });
       }
     });
