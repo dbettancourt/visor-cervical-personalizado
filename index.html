@@ -116,7 +116,7 @@ h2{font-size:1.15rem;margin:20px 0 8px}
     <div class="card sticky-viz">
       <div class="fig-wrap">
         <svg class="fig" id="fig" viewBox="0 0 320 380" role="img" aria-label="Esquema del cuello"></svg>
-        <div id="webgl-container" role="img" aria-label="Modelo 3D anatómico del cráneo y las vértebras cervicales">
+        <div id="webgl-container" role="img" aria-label="Modelo 3D realista de la cabeza y cuello">
             <div id="loading-msg">Cargando modelo 3D...</div>
         </div>
       </div>
@@ -163,7 +163,8 @@ h2{font-size:1.15rem;margin:20px 0 8px}
 
 <script type="module">
 import * as THREE from 'three';
-import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
+import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
+import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
 
 // ===== VARIABLES GLOBALES Y ESTADO =====
 // Nota: Se define 'hk' aquí arriba para evitar errores de referencia en poseSummary()
@@ -171,61 +172,6 @@ let hk = "rot";
 let mv = "flex", side = "der";
 let scene, camera, renderer, headPivot;
 let modelLoaded = false;
-let joints = [];                       // articulaciones del rig (una por vértebra)
-const cur = { x: 0, y: 0, z: 0 };      // ángulos suavizados (rad)
-
-// ===== MODELO ÓSEO: CRÁNEO + C1 A C7 =====
-// Nombres de las piezas dentro de cuello_cabeza.glb, de la base al cráneo.
-// C7 queda fija; cada pieza siguiente gira sobre la anterior (cadena cinemática).
-const CADENA = ["C7", "C6", "C5", "C4", "C3", "C2", "C1", "SKULL"];
-
-// Fracción ACUMULADA del movimiento total en cada nivel (0 = base fija, 1 = cráneo).
-// Flexión/extensión e inclinación: reparto lineal, igual que el esquema 2D.
-// Rotación: aprox. la mitad ocurre en C1-C2 (valor orientativo, ajustable).
-const REPARTO = {
-  fe:   [0, 1/7, 2/7, 3/7, 4/7, 5/7, 6/7, 1],
-  tilt: [0, 1/7, 2/7, 3/7, 4/7, 5/7, 6/7, 1],
-  rot:  [0, 0.08, 0.16, 0.24, 0.32, 0.40, 0.90, 1]
-};
-
-// Si algún movimiento sale al revés con este modelo, cambia 1 por -1.
-const SIGNO = { fe: 1, rot: 1, tilt: 1 };
-
-function buildRig(root) {
-  root.updateMatrixWorld(true);
-  const nodes = CADENA.map(n => root.getObjectByName(n));
-  const faltan = CADENA.filter((n, i) => !nodes[i]);
-  if (faltan.length) throw new Error("Faltan piezas en el GLB: " + faltan.join(", "));
-
-  const boxes = nodes.map(n => new THREE.Box3().setFromObject(n));
-  const centers = boxes.map(b => b.getCenter(new THREE.Vector3()));
-
-  // Pivote de cada articulación: entre dos vértebras (disco); el del cráneo, sobre C1.
-  const pivots = [null];
-  for (let i = 1; i < CADENA.length - 1; i++) {
-    pivots.push(centers[i - 1].clone().add(centers[i]).multiplyScalar(0.5));
-  }
-  const hC1 = boxes[6].max.y - boxes[6].min.y;
-  pivots.push(new THREE.Vector3(centers[6].x, centers[6].y + 0.35 * hC1, centers[6].z));
-
-  const rig = new THREE.Group();
-  root.add(rig);
-  rig.attach(nodes[0]);                 // C7 fija
-
-  const js = [null];
-  let parent = rig, parentPos = new THREE.Vector3();
-  for (let i = 1; i < CADENA.length; i++) {
-    const j = new THREE.Group();
-    j.rotation.order = 'YXZ';
-    j.position.copy(pivots[i]).sub(parentPos);
-    parent.add(j);
-    j.attach(nodes[i]);                 // conserva la posición de reposo
-    js.push(j);
-    parent = j;
-    parentPos = pivots[i];
-  }
-  return js;
-}
 const container = document.getElementById('webgl-container');
 const loadingMsg = document.getElementById('loading-msg');
 
@@ -421,59 +367,48 @@ function init3D() {
   headPivot = new THREE.Group();
   scene.add(headPivot);
 
-  const loader = new GLTFLoader();
+  const loader = new OBJLoader();
   
   // Ruta robusta para GitHub Pages y local
   const isGitHubPages = window.location.hostname.includes('github.io');
   const modelUrl = isGitHubPages 
-    ? 'https://dbettancourt.github.io/visor-cervical-personalizado/cuello_cabeza.glb?v=1' 
-    : './cuello_cabeza.glb';
+    ? 'https://dbettancourt.github.io/visor-cervical-personalizado/Person002_wrap.obj?v=2' 
+    : './Person002_wrap.obj';
 
   console.log("Intentando cargar modelo desde:", modelUrl);
 
-  const mostrarError = (html) => {
+  loader.load(modelUrl, (object) => {
+    // Ocultar mensaje de carga en lugar de eliminarlo (más seguro)
     if(loadingMsg) loadingMsg.style.display = 'none';
-    const errorDiv = document.createElement('div');
-    errorDiv.style.cssText = 'color: var(--cmp); padding: 20px; text-align: center; font-size: 0.9rem; background: var(--cmpbg); border-radius: 8px; margin: 10px; position:absolute; z-index:2;';
-    errorDiv.innerHTML = html;
-    container.appendChild(errorDiv);
-  };
-
-  loader.load(modelUrl, (gltf) => {
-    const object = gltf.scene;
-
-    // Armar la cadena de vértebras (C7 fija -> C1 -> cráneo)
-    try {
-      joints = buildRig(object);
-    } catch (e) {
-      console.error("❌ Error armando el rig:", e);
-      mostrarError(`<b>El modelo se cargó pero no tiene las piezas esperadas</b><br>${e.message}<br>Revisa los nombres de los objetos exportados desde Blender (C1 a C7 y SKULL).`);
-      return;
-    }
-
-    if(loadingMsg) loadingMsg.style.display = 'none';
-
-    // --- ESCALADO Y CENTRADO ---
+    
+    // --- CORRECCIÓN CRÍTICA DE ESCALADO Y CENTRADO ---
+    // 1. Escalar primero
     const boxInit = new THREE.Box3().setFromObject(object);
     const sizeInit = boxInit.getSize(new THREE.Vector3());
     const maxDim = Math.max(sizeInit.x, sizeInit.y, sizeInit.z);
     const scaleFactor = 2.5 / maxDim; // Ajusta este 2.5 si el modelo se ve muy grande/pequeño
     object.scale.setScalar(scaleFactor);
 
+    // 2. Recalcular caja con el nuevo tamaño
     const boxScaled = new THREE.Box3().setFromObject(object);
     const centerScaled = boxScaled.getCenter(new THREE.Vector3());
-    object.position.sub(centerScaled);
-    // ---------------------------
 
-    // Material óseo
+    // 3. Centrar el objeto restando el nuevo centro
+    object.position.sub(centerScaled);
+    // --------------------------------------------------
+
+    // Aplicar material
     object.traverse((child) => {
       if (child.isMesh) {
-        if (!child.geometry.attributes.normal) child.geometry.computeVertexNormals();
+        // Recalcular normales: sin ellas el modelo se ve plano (solo silueta)
+        child.geometry.deleteAttribute('normal');
+        child.geometry = mergeVertices(child.geometry, 1e-4);
+        child.geometry.computeVertexNormals();
         child.material = new THREE.MeshStandardMaterial({
-          color: 0xe6dccb,
-          roughness: 0.65,
-          metalness: 0.05,
-          side: THREE.DoubleSide,
+          color: 0xebbfae, 
+          roughness: 0.6,
+          metalness: 0.1,
+          side: THREE.DoubleSide, // Útil si el modelo tiene caras abiertas
           flatShading: false
         });
       }
@@ -490,8 +425,13 @@ function init3D() {
     }
   },
   (err) => {
-    console.error("❌ Error cargando el modelo .glb: ", err);
-    mostrarError(`<b>Error al cargar el modelo 3D</b><br>URL intentada: <code style="font-size:0.8em;word-break:break-all;">${modelUrl}</code><br>Verifica que el archivo <i>cuello_cabeza.glb</i> está junto al index.html y que abres la página desde un servidor (no con doble clic).`);
+    console.error("❌ Error cargando el modelo .obj: ", err);
+    if(loadingMsg) loadingMsg.style.display = 'none';
+    
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = 'color: var(--cmp); padding: 20px; text-align: center; font-size: 0.9rem; background: var(--cmpbg); border-radius: 8px; margin: 10px; position:absolute; z-index:2;';
+    errorDiv.innerHTML = `<b>Error al cargar el modelo 3D</b><br>URL intentada: <code style="font-size:0.8em;word-break:break-all;">${modelUrl}</code><br>Verifica que el archivo <i>Person002_wrap.obj</i> está en la raíz del repositorio.`;
+    container.appendChild(errorDiv);
   });
 
   window.addEventListener('resize', onWindowResize);
@@ -509,20 +449,15 @@ function animate() {
   requestAnimationFrame(animate);
   
   if (modelLoaded && headPivot) {
-    // Ángulos totales (cráneo) con suavizado, igual que antes
-    const targetRotY = SIGNO.rot  * (V0.rot / 100) * (Math.PI / 3); 
-    const targetRotZ = SIGNO.tilt * (V0.tilt / 100) * -(Math.PI / 5); 
-    const targetRotX = SIGNO.fe   * (V0.fe / 100) * (Math.PI / 5); // fe<0 = extensión -> la cara sube
-    cur.y += (targetRotY - cur.y) * 0.1;
-    cur.z += (targetRotZ - cur.z) * 0.1;
-    cur.x += (targetRotX - cur.x) * 0.1;
+    // Suavizado de rotaciones basado en los valores de V0
+    const targetRotY = (V0.rot / 100) * (Math.PI / 3); 
+    headPivot.rotation.y += (targetRotY - headPivot.rotation.y) * 0.1; 
 
-    // Cada articulación recibe solo su fracción del movimiento total
-    for (let i = 1; i < joints.length; i++) {
-      joints[i].rotation.x = (REPARTO.fe[i]   - REPARTO.fe[i - 1])   * cur.x;
-      joints[i].rotation.y = (REPARTO.rot[i]  - REPARTO.rot[i - 1])  * cur.y;
-      joints[i].rotation.z = (REPARTO.tilt[i] - REPARTO.tilt[i - 1]) * cur.z;
-    }
+    const targetRotZ = (V0.tilt / 100) * -(Math.PI / 5); 
+    headPivot.rotation.z += (targetRotZ - headPivot.rotation.z) * 0.1;
+
+    const targetRotX = (V0.fe / 100) * (Math.PI / 5); // fe<0 = extensión -> la cara sube
+    headPivot.rotation.x += (targetRotX - headPivot.rotation.x) * 0.1;
 
     const targetPosZ = (V0.prot / 100) * 0.2; // adelantamiento -> hacia la cámara
     headPivot.position.z += (targetPosZ - headPivot.position.z) * 0.1;
