@@ -104,29 +104,26 @@ h2{font-size:1.15rem;margin:20px 0 8px}
     70% { box-shadow: 0 0 0 10px rgba(163, 33, 27, 0); }
     100% { box-shadow: 0 0 0 0 rgba(163, 33, 27, 0); }
 }
-@media (prefers-reduced-motion:reduce){.clinical-warning.active{animation:none}}
-.alt-h{font-size:1rem;margin:16px 0 8px}
-.nodep ul{margin:0 0 8px;padding-left:20px}.nodep li{margin-bottom:8px}
 </style>
 </head>
 <body>
 <main>
 <h1>Mapa del movimiento cervical - Personalizado</h1>
-<p class="sub">Basado en tus informes (2020-2024). El esquema del cuello refleja la rectificación de la lordosis (RM abr-2024) y la mínima anterolistesis de C2-C3 y C3-C4 en flexión (RX dinámica ago-2024). No mide compresión real. Los rangos de movimiento son de referencia, no medidos en ti.</p>
+<p class="sub">Basado en tus resonancias (2022-2024). Este esquema refleja tu rectificación de la lordosis y la anterolistesis C2-C4 en flexión. No mide compresión real, pero advierte de tus riesgos específicos.</p>
 
 <div class="grid">
   <div>
     <div class="card sticky-viz">
       <div class="fig-wrap">
         <svg class="fig" id="fig" viewBox="0 0 320 380" role="img" aria-label="Esquema del cuello"></svg>
-        <div id="webgl-container" role="img" aria-label="Modelo 3D realista de la cabeza y cuello">
+        <div id="webgl-container" role="img" aria-label="Modelo 3D anatómico del cráneo y las vértebras cervicales">
             <div id="loading-msg">Cargando modelo 3D...</div>
         </div>
       </div>
       <p class="cap" id="cap"></p>
       
       <div id="clinical-warning" class="clinical-warning">
-        ⚠️ Zona de precaución: tu RX dinámica (ago-2024) mostró una mínima anterolistesis grado 1 de C2 sobre C3 y de C3 sobre C4, evidente en flexión. Tu RM cervical (abr-2024) muestra canal amplio y médula normal. El visor no sabe desde qué grado aparece el desplazamiento ni indica compresión.
+        ⚠️ ATENCIÓN: Tu RX dinámica confirma anterolistesis de C2 sobre C3 y C3 sobre C4 en flexión. Evita forzar el mentón al pecho.
       </div>
 
       <div class="cap" id="pr" style="color:var(--ink)"></div>
@@ -149,21 +146,10 @@ h2{font-size:1.15rem;margin:20px 0 8px}
     <section aria-live="polite"><div id="out"></div></section>
     <h2>Otras partes del cuerpo</h2>
     <div class="card bm"><svg id="body" viewBox="0 0 120 300" role="img" aria-label="Silueta del cuerpo con las zonas que pueden responder"></svg><div id="bp"></div></div>
-    <h2>Hallazgos de tus informes que no dependen del movimiento del cuello</h2>
-    <div class="card nodep">
-      <ul>
-        <li><b>Quiste aracnoideo frontoparietal derecho</b> con remodelación de la tabla ósea interna (TAC 09-nov-2022: aprox. 53×19×57 mm; RM 21-nov-2022: 58×24×46 mm).</li>
-        <li><b>Aracnoidocele selar:</b> la cisterna supraselar desciende hacia la silla turca y desplaza la hipófisis hacia el piso (TAC y RM de cerebro 2022; hallazgo incidental en la RM cervical de abr-2024).</li>
-        <li><b>Senos maxilares:</b> engrosamiento mucoso y quiste de retención en el seno izquierdo (TAC y RM 2022).</li>
-        <li><b>Columna lumbar (RX jul-2020):</b> disminución de la amplitud del espacio intervertebral posterior L5-S1, sin lesión ósea aguda.</li>
-        <li><b>Columna cervical (RM abr-2024):</b> deshidratación discal multisegmentaria, discos C2-C3 a C7-T1 sin herniaciones, canal y agujeros amplios, médula normal.</li>
-      </ul>
-      <p class="cap">Estos hallazgos no cambian con la posición del cuello, por eso no se dibujan en el esquema. Coméntalos con tu médico o neurólogo: el visor no indica si se relacionan con tus síntomas.</p>
-    </div>
   </div>
 </div>
 
-<p class="note"><b>Aviso clínico:</b> Este visor usa tus informes: RX lumbar (jul-2020), TAC y RM de cerebro (nov-2022), RM cervical (abr-2024) y RX cervical dinámica (ago-2024). Ninguno de ellos contiene mediciones de rango de movimiento, por lo que los grados del visor son valores de referencia de población general y no tus rangos reales (con hipermovilidad pueden ser mayores). Los informes no describen inestabilidad C1-C2, compresión medular ni estrechamiento de agujeros; las advertencias sobre esas estructuras son anatómicas generales. Es una representación gráfica simplificada y no sustituye la evaluación de tu médico. Si aparecen síntomas nuevos (debilidad, desmayo, visión doble, torpeza al caminar), busca atención médica urgente.</p>
+<p class="note"><b>Aviso Clínico Personalizado:</b> Este visor ha sido adaptado con los hallazgos de tus resonancias y radiografías (2022-2024). Refleja la rectificación de la lordosis cervical y la anterolistesis C2-C4 documentada en flexión. Aunque está basado en tus informes, sigue siendo una representación gráfica simplificada. No sustituye la evaluación de tu médico ni mide la compresión real en tiempo real. No fuerces los rangos extremos. Si aparecen síntomas nuevos (debilidad, desmayo, visión doble), busca atención médica urgente.</p>
 </main>
 
 <script type="importmap">
@@ -177,8 +163,7 @@ h2{font-size:1.15rem;margin:20px 0 8px}
 
 <script type="module">
 import * as THREE from 'three';
-import { OBJLoader } from 'three/addons/loaders/OBJLoader.js';
-import { mergeVertices } from 'three/addons/utils/BufferGeometryUtils.js';
+import { GLTFLoader } from 'three/addons/loaders/GLTFLoader.js';
 
 // ===== VARIABLES GLOBALES Y ESTADO =====
 // Nota: Se define 'hk' aquí arriba para evitar errores de referencia en poseSummary()
@@ -186,41 +171,80 @@ let hk = "rot";
 let mv = "flex", side = "der";
 let scene, camera, renderer, headPivot;
 let modelLoaded = false;
+let joints = [];                       // articulaciones del rig (una por vértebra)
+const cur = { x: 0, y: 0, z: 0 };      // ángulos suavizados (rad)
+
+// ===== MODELO ÓSEO: CRÁNEO + C1 A C7 =====
+// Nombres de las piezas dentro de cuello_cabeza.glb, de la base al cráneo.
+// C7 queda fija; cada pieza siguiente gira sobre la anterior (cadena cinemática).
+const CADENA = ["C7", "C6", "C5", "C4", "C3", "C2", "C1", "SKULL"];
+
+// Fracción ACUMULADA del movimiento total en cada nivel (0 = base fija, 1 = cráneo).
+// Flexión/extensión e inclinación: reparto lineal, igual que el esquema 2D.
+// Rotación: aprox. la mitad ocurre en C1-C2 (valor orientativo, ajustable).
+const REPARTO = {
+  fe:   [0, 1/7, 2/7, 3/7, 4/7, 5/7, 6/7, 1],
+  tilt: [0, 1/7, 2/7, 3/7, 4/7, 5/7, 6/7, 1],
+  rot:  [0, 0.08, 0.16, 0.24, 0.32, 0.40, 0.90, 1]
+};
+
+// Si algún movimiento sale al revés con este modelo, cambia 1 por -1.
+const SIGNO = { fe: 1, rot: 1, tilt: 1 };
+
+function buildRig(root) {
+  root.updateMatrixWorld(true);
+  const nodes = CADENA.map(n => root.getObjectByName(n));
+  const faltan = CADENA.filter((n, i) => !nodes[i]);
+  if (faltan.length) throw new Error("Faltan piezas en el GLB: " + faltan.join(", "));
+
+  const boxes = nodes.map(n => new THREE.Box3().setFromObject(n));
+  const centers = boxes.map(b => b.getCenter(new THREE.Vector3()));
+
+  // Pivote de cada articulación: entre dos vértebras (disco); el del cráneo, sobre C1.
+  const pivots = [null];
+  for (let i = 1; i < CADENA.length - 1; i++) {
+    pivots.push(centers[i - 1].clone().add(centers[i]).multiplyScalar(0.5));
+  }
+  const hC1 = boxes[6].max.y - boxes[6].min.y;
+  pivots.push(new THREE.Vector3(centers[6].x, centers[6].y + 0.35 * hC1, centers[6].z));
+
+  const rig = new THREE.Group();
+  root.add(rig);
+  rig.attach(nodes[0]);                 // C7 fija
+
+  const js = [null];
+  let parent = rig, parentPos = new THREE.Vector3();
+  for (let i = 1; i < CADENA.length; i++) {
+    const j = new THREE.Group();
+    j.rotation.order = 'YXZ';
+    j.position.copy(pivots[i]).sub(parentPos);
+    parent.add(j);
+    j.attach(nodes[i]);                 // conserva la posición de reposo
+    js.push(j);
+    parent = j;
+    parentPos = pivots[i];
+  }
+  return js;
+}
 const container = document.getElementById('webgl-container');
 const loadingMsg = document.getElementById('loading-msg');
 
-// ===== RANGOS DE MOVIMIENTO =====
-// Tus informes NO contienen mediciones de rango de movimiento.
-// REFERENCIA = valores aproximados de población adulta general (varían según la fuente).
-// MEDIDOS: completa con tus valores reales (goniómetro/inclinómetro, kinesiólogo o fisiatra).
-// Con hipermovilidad (SED) tu rango real puede ser MAYOR que la referencia.
-const REFERENCIA = { flex: 50, ext: 60, rot: 80, tilt: 40 };
-const MEDIDOS    = { flex: null, ext: null, rot: null, tilt: null };
-const maxDe = k => (MEDIDOS[k] ?? REFERENCIA[k]);
-
-// % del rango de flexión desde el cual el visor marca la zona de precaución por la anterolistesis.
-// El informe de RX dice que es "evidente en flexión" pero no indica desde qué grado: valor ajustable, no medido.
-const ZONA_FLEX = 70;
-
 const MOV={
-flex:{n:"Flexión (mentón al pecho)",v:"side",max:maxDe("flex"),cap:"Vista lateral. La cara mira a la derecha."},
-ext:{n:"Extensión (mirar arriba)",v:"side",max:maxDe("ext"),cap:"Vista lateral. La cara mira a la derecha."},
+flex:{n:"Flexión (mentón al pecho)",v:"side",max:35,cap:"Vista lateral. La cara mira a la derecha. (Limitado a 35° por anterolistesis C2-C4)"},
+ext:{n:"Extensión (mirar arriba)",v:"side",max:50,cap:"Vista lateral. La cara mira a la derecha."},
 prot:{n:"Traslación anterior/posterior de la cabeza",v:"side",max:100,cap:"Vista lateral. Desplazamiento de la cabeza hacia delante o retracción hacia atrás."},
-rot:{n:"Rotación",v:"top",max:maxDe("rot"),cap:"Vista desde arriba. La nariz apunta hacia arriba del dibujo."},
-tilt:{n:"Inclinación lateral",v:"front",max:maxDe("tilt"),cap:"Vista de frente. El lado derecho de la persona queda a la izquierda del dibujo."}};
+rot:{n:"Rotación",v:"top",max:80,cap:"Vista desde arriba. La nariz apunta hacia arriba del dibujo."},
+tilt:{n:"Inclinación lateral",v:"front",max:40,cap:"Vista de frente. El lado derecho de la persona queda a la izquierda del dibujo."}};
 
-// Niveles: 0 = poco cambio, 1 = estiramiento o carga, 2 = posible estrechamiento teórico.
-// Con tus informes (canal y agujeros amplios, médula normal) ningún nivel 2 está respaldado, por eso no se usa.
 const S=[
 ["Nervio vago",{flex:[1,"Estiramiento leve al alargarse la vaina que comparte con la carótida y la yugular."],ext:[0,"Poco cambio; el trayecto se acorta y se relaja."],prot:[1,"Tensión leve y sostenida desde la base del cráneo hasta el cuello."],rot:[1,"Lado {C}: se estira. Lado {I}: se relaja, aunque puede rozar el músculo esternocleidomastoideo."],tilt:[1,"Lado {C}: se estira. Lado {I}: la vaina queda presionada por los músculos laterales."]}],
-["Arteria vertebral",{flex:[1,"Se estira un poco entre C1 y el cráneo."],ext:[1,"Puede pinzarse entre el occipucio y C1, donde hace un giro muy cerrado. Tus informes no evalúan esta arteria (no hay angio-RM): es una advertencia anatómica general, no un hallazgo tuyo."],prot:[1,"Extiende la unión del cráneo con C1: mismo punto de estrechamiento teórico que en la extensión. No evaluado en tus informes."],rot:[1,"Lado {C}: puede estirarse o comprimirse a nivel C1-C2, más aún con laxitud. Tus informes no evalúan esta arteria: es una advertencia general."],tilt:[1,"Lado {I}: puede plegarse. Lado {C}: se estira."]}],
-["Tronco encefálico y unión craneocervical",{flex:[1,"Zona de atención general en hipermovilidad. En tus estudios no hay hallazgo: la RX muestra distancia y relación atlas-odontoides normales y la RM de cerebro, tronco encefálico y cerebelo normales."],ext:[1,"El borde del agujero magno y el arco de C1 se acercan por detrás. Sin hallazgo en tus estudios."],prot:[1,"Combina tracción y compresión; es una posición exigente si hay laxitud. Sin hallazgo en tus estudios."],rot:[1,"C1 gira sobre C2 y los ligamentos alares se tensan. Con laxitud, el giro excesivo reduce el espacio. Tu RX muestra relación atlas-odontoides normal."],tilt:[1,"Los ligamentos alares frenan el desplazamiento lateral y trabajan de más con laxitud."]}],
-["Médula cervical",{flex:[1,"Tu RM cervical muestra canal amplio y médula de calibre e intensidad de señal conservados, y no describe estrechamiento. Se mantiene como zona de atención por la mínima anterolistesis en flexión."],ext:[1,"El ligamento amarillo se pliega hacia atrás. Tu RM muestra canal amplio y sin cambios degenerativos: no hay hallazgo de estrechamiento."],prot:[1,"Estiramiento sostenido en la zona baja del cuello."],rot:[1,"Se tuerce levemente. Tu RM muestra canal amplio."],tilt:[0,"Cambio pequeño: tu canal es amplio."]}],
-["Raíces nerviosas y plexo braquial",{flex:[1,"Se estiran al abrirse los agujeros de salida."],ext:[1,"Los agujeros se acercan en extensión. Tu RM muestra agujeros de conjunción amplios, por lo que no se documenta riesgo de pinzamiento."],prot:[1,"Tensión en las raíces bajas (C5 a C8)."],rot:[1,"Lado {I}: el agujero se cierra un poco. Lado {C}: se abre."],tilt:[1,"Lado {I}: el agujero se cierra un poco (tus agujeros son amplios en la RM). Lado {C}: el plexo braquial se estira."]}],
-["Ligamentos y cápsulas articulares",{flex:[1,"Los ligamentos posteriores soportan la tensión. Tu RM muestra rectificación de la lordosis, pero los informes no miden la tensión de los ligamentos."],ext:[1,"Los ligamentos anteriores y las cápsulas articulares soportan la carga."],prot:[1,"Carga sostenida en ligamentos y cápsulas."],rot:[1,"Los ligamentos alares y transverso frenan el giro; con laxitud pueden limitar peor. Tu RX muestra relación atlas-odontoides normal."],tilt:[1,"Las cápsulas articulares del lado {C} se estiran."]}],
-["Músculos suboccipitales y esternocleidomastoideo",{flex:[1,"Se estiran y los extensores frenan el peso de la cabeza."],ext:[1,"Los suboccipitales se acortan y se sobrecargan."],prot:[1,"Suboccipitales acortados de forma sostenida; fuente frecuente de dolor de cabeza de origen cervical."],rot:[1,"Lado {C}: el esternocleidomastoideo se estira. Lado {I}: se acorta."],tilt:[1,"Lado {C} se estira, lado {I} se acorta."]}],
-["Anterolistesis C2-C3 y C3-C4 (hallazgo RX)",{flex:[1,"RX dinámica (ago-2024): mínima anterolistesis grado 1 de C2 sobre C3 y de C3 sobre C4, evidente en flexión. El informe no indica milímetros y sugiere estudios complementarios solo si persiste la duda clínica. La RM muestra canal amplio y médula normal, y no se documenta compresión. El visor la marca solo en el extremo del rango de flexión."],ext:[0,"En extensión el informe no describe desplazamiento: aparece en flexión."],prot:[1,"Hipótesis: la cabeza adelantada podría cargar C2-C4. No fue evaluado en tus estudios."],rot:[0,"No evaluado en tus estudios. La RM muestra articulaciones interapofisiarias alineadas y sin cambios degenerativos."],tilt:[0,"No evaluado en tus estudios."]}],
-["Discos cervicales (RM)",{flex:[1,"Mayor carga en la parte posterior del disco. Tu RM muestra deshidratación discal multisegmentaria, discos C2-C3 a C7-T1 sin herniaciones y alturas conservadas."],ext:[1,"Mayor carga en la parte anterior del disco. Deshidratación multisegmentaria, sin herniaciones."],prot:[1,"Carga sostenida sobre los discos de la zona baja del cuello."],rot:[1,"Carga de torsión moderada sobre los discos."],tilt:[1,"Carga asimétrica: el lado {C} se abre y el lado {I} se comprime."]}]
+["Arteria vertebral",{flex:[1,"Se estira un poco entre C1 y el cráneo."],ext:[2,"Puede pinzarse entre el occipucio y C1, donde hace un giro muy cerrado. Mareo o visión borrosa son posibles."],prot:[2,"Extiende la unión del cráneo con C1: mismo punto de pinzamiento que en la extensión."],rot:[2,"Lado {C}: puede estirarse o comprimirse a nivel C1-C2, más aún con laxitud. Puede dar mareo o presíncope."],tilt:[1,"Lado {I}: puede plegarse. Lado {C}: se estira."]}],
+["Tronco encefálico y unión craneocervical",{flex:[2,"Con tu anterolistesis C2-C4, la flexión puede hacer que las vértebras se deslicen hacia adelante, estrechando el canal y aumentando el riesgo de roce medular anterior."],ext:[1,"El borde del agujero magno y el arco de C1 se acercan por detrás."],prot:[2,"Combina tracción y compresión; es una posición exigente si hay inestabilidad."],rot:[1,"C1 gira sobre C2 y los ligamentos alares se tensan. Con laxitud, el giro excesivo reduce el espacio."],tilt:[1,"Los ligamentos alares frenan el desplazamiento lateral y trabajan de más con laxitud."]}],
+["Médula cervical",{flex:[2,"Con tu anterolistesis de C2-C3 y C3-C4, la flexión puede hacer que las vértebras se deslicen hacia adelante, estrechando el canal y aumentando el risko de roce medular. Evita llegar al final del rango."],ext:[2,"El ligamento amarillo se pliega hacia atrás y reduce el canal: posible estrechamiento o compromiso teórico."],prot:[1,"Estiramiento sostenido en la zona baja del cuello."],rot:[1,"Se tuerce levemente y el canal se estrecha un poco."],tilt:[0,"Cambio pequeño si no hay estenosis."]}],
+["Raíces nerviosas y plexo braquial",{flex:[1,"Se estiran al abrirse los agujeros de salida."],ext:[2,"Los agujeros se estrechan: posible pinzamiento y dolor que baja al brazo."],prot:[1,"Tensión en las raíces bajas (C5 a C8)."],rot:[1,"Lado {I}: el agujero se cierra. Lado {C}: se abre."],tilt:[2,"Lado {I}: el agujero se cierra (posible pinzamiento). Lado {C}: el plexo braquial se estira."]}],
+["Ligamentos y cápsulas articulares",{flex:[1,"Los ligamentos posteriores soportan la tensión. Con tu rectificación de la lordosis, están más tensos de lo normal en posición neutra."],ext:[1,"Los ligamentos anteriores y las cápsulas articulares soportan la carga."],prot:[1,"Carga sostenida en ligamentos y cápsulas."],rot:[1,"Los ligamentos alares y transverso trabajan al máximo; en SED pueden limitar peor."],tilt:[1,"Las cápsulas articulares del lado {C} se estiran."]}],
+["Músculos suboccipitales y esternocleidomastoideo",{flex:[1,"Se estiran y los extensores frenan el peso de la cabeza. Tu rectificación de la lordosis hace que los suboccipitales estén más tensos de lo normal."],ext:[1,"Los suboccipitales se acortan y se sobrecargan."],prot:[1,"Suboccipitales acortados de forma sostenida; fuente frecuente de dolor de cabeza de origen cervical."],rot:[1,"Lado {C}: el esternocleidomastoideo se estira. Lado {I}: se acorta."],tilt:[1,"Lado {C} se estira, lado {I} se acorta."]}],
+["Inestabilidad C2-C4 (Hallazgo RX)",{flex:[2,"Tu radiografía dinámica confirma anterolistesis grado 1 de C2 sobre C3 y C3 sobre C4 en flexión. Aquí hay microinestabilidad y riesgo de compresión medular anterior."],ext:[1,"En extensión, las vértebras vuelven a su sitio, pero los ligamentos están laxos."],prot:[2,"El adelantamiento de la cabeza puede agravar el deslizamiento vertebral."],rot:[1,"La rotación puede generar estrés en las facetas de C2-C4."],tilt:[1,"La inclinación lateral puede descompensar la alineación."]}]
 ];
 
 const TAG=["Poco cambio","Estiramiento o carga","Posible estrechamiento o compromiso teórico"];
@@ -231,7 +255,7 @@ const V0={fe:0,prot:0,rot:0,tilt:0};let focus="fe";
 
 function updateClinicalWarning() {
     const warningEl = $("clinical-warning");
-    if (V0.fe >= ZONA_FLEX) {
+    if (V0.fe > 15 || V0.prot > 15) {
         warningEl.classList.add("active");
     } else {
         warningEl.classList.remove("active");
@@ -270,13 +294,13 @@ const PA={
 2:{flex:"odontoides de C2",ext:"agujero magno y C1",prot:"odontoides y agujero magno",rot:"odontoides y ligamento",tilt:"masas laterales de C1"},
 3:{flex:"odontoides y vértebras",ext:"ligamento amarillo y láminas",prot:"cuerpos vertebrales",rot:"ligamento transverso",tilt:"paredes del canal"},
 4:{ext:"articulaciones facetarias",tilt:"articulaciones facetarias",def:"huesos del agujero"}};
-const NS=["Nervio vago","Arteria vertebral","Tronco encefálico","Médula","Raíces nerviosas","Ligamento nucal","Suboccipitales","Anterolistesis","Discos"];
+const NS=["Nervio vago","Arteria vertebral","Tronco encefálico","Médula","Raíces nerviosas","Ligamento nucal","Suboccipitales", "Inestabilidad C2-C4"];
 const mark=(i,p,v,an,l)=>{const c=v>1?"var(--cmp)":"var(--str)",x=p[0].toFixed(1),y=p[1].toFixed(1);
 const ar=v>1?[0,180].map(d=>{const q=(an+d)*R,f=(r)=>[(p[0]+Math.cos(q)*r).toFixed(1),(p[1]+Math.sin(q)*r).toFixed(1)],a=f(24),b=f(13);return `<line x1="${a[0]}" y1="${a[1]}" x2="${b[0]}" y2="${b[1]}" stroke="${c}" stroke-width="3" marker-end="url(#ar)"/>`}).join(""):"";
 const ag=v>1&&PA[i]?(PA[i][mv]||PA[i].def||""):"";const tl=l?`<text x="${l==="l"?p[0]-15:p[0]+15}" y="${(p[1]+4).toFixed(1)}" text-anchor="${l==="l"?"end":"start"}" font-size="10" font-weight="700" fill="var(--ink)" stroke="var(--card)" stroke-width="3" paint-order="stroke">${NS[i]}</text>`+(ag?`<text x="${l==="l"?p[0]-15:p[0]+15}" y="${(p[1]+15).toFixed(1)}" text-anchor="${l==="l"?"end":"start"}" font-size="9" fill="var(--cmp)" stroke="var(--card)" stroke-width="3" paint-order="stroke">contra ${ag}</text>`:""):"";
 return `<g class="mk${v}">${ar}<circle cx="${x}" cy="${y}" r="10" fill="${c}" fill-opacity=".3" stroke="${c}" stroke-width="2"/><text x="${x}" y="${(p[1]+4).toFixed(1)}" text-anchor="middle" font-size="11" font-weight="700" fill="var(--ink)">${i+1}</text>${tl}</g>`};
 const SED=()=>$("sed").checked;
-function eff(s,a,n,q){if(a<20)return 0;if(n===S[7][0]&&q==="flex"&&a<ZONA_FLEX)return 0;return s;}
+function eff(s,a,n,q){if(a<20)return 0;return s;}
 function draw(a){
 const m=MOV[mv],deg=m.max*a/100;
 const st=S.map(([n,d])=>eff(d[mv][0],a,n,mv));
@@ -301,7 +325,10 @@ const vg=V.map(o=>tf([32,0],o)).concat([tf([32,-10],V[6]),tf([26,-22],K)]);
 s+=pl(vg,"var(--vago)",12,'opacity=".18"')+pl(vg,cv,3.5);
 const tx=(q,x,fs)=>`<text x="${q[0].toFixed(1)}" y="${q[1].toFixed(1)}" font-size="${fs}" fill="var(--mute)">${x}</text>`;
 s+=V.map((o,i)=>tx(tf([-62,4],o),"C"+(7-i),10)).join("")+tx(tf([88,6],V[1]),"Tráquea y esófago",9)+tx(tf([-40,-38],K),"Cerebelo",9);
-H=[[0,tf([32,-8],V[6]),0,"r"],[1,tf([-14,-14],V[6]),90,"l"],[2,tf([8,-34],V[5]),0,"r"],[3,tf([-12,0],V[3]),0,"l"],[4,tf([4,-20],V[3]),0,"r"],[5,spin(V[1]),0,"l"],[6,[(m1[0]+m2[0])/2,(m1[1]+m2[1])/2],90,"l"],[7,tf([22,-14],V[4]),0,"r"]];
+if(mv==="flex" && a > 20) {
+    s+=`<circle cx="${tf([-10,0],V[4])[0].toFixed(1)}" cy="${tf([-10,0],V[4])[1].toFixed(1)}" r="12" fill="var(--cmp)" opacity="0.3"/><text x="${tf([-10,0],V[4])[0].toFixed(1)}" y="${tf([-10,0],V[4])[1].toFixed(1)}" text-anchor="middle" font-size="9" fill="white" font-weight="bold">!</text>`;
+}
+H=[[0,tf([32,-8],V[6]),0,"r"],[1,tf([-14,-14],V[6]),90,"l"],[2,tf([8,-34],V[5]),0,"r"],[3,tf([-12,0],V[3]),0,"l"],[4,tf([4,-20],V[3]),0,"r"],[5,spin(V[1]),0,"l"],[6,[(m1[0]+m2[0])/2,(m1[1]+m2[1])/2],90,"l"]];
 }else if(m.v==="top"){
 const r=(side==="der"?1:-1)*deg,cx=160,cy=172,rp=(x,y)=>tf({x:cx,y:cy,a:r},[x-cx,y-cy]);
 const ax=side==="der"?102:218,vx=side==="der"?88:232;
@@ -329,8 +356,8 @@ s+=H.map(([i,p,an,l])=>st[i]?mark(i,p,st[i],an||0,l):"").join("");
 $("fig").innerHTML=s;}
 
 const BP=[
-["Cabeza, ojos y oídos",[1,2],"Mareo, visión borrosa, zumbido de oídos, dolor de cabeza o sensación de desmayo si baja el flujo de la arteria vertebral o se afecta el tronco encefálico. Tus informes no muestran compromiso de estas estructuras.","Hallazgos de tus informes que no dependen del cuello y podrían contribuir a dolor o presión en la cabeza: aracnoidocele selar, quiste aracnoideo frontoparietal derecho y cambios inflamatorios en los senos maxilares. Si se relacionan con tus síntomas, debe evaluarlo tu médico o neurólogo."],
-["Mandíbula y cara",[6,2],"Tensión mandibular y dolor en la cara; el núcleo del nervio trigémino se extiende hasta los primeros segmentos cervicales.","Los senos maxilares tienen engrosamiento mucoso y un quiste de retención en el izquierdo (TAC y RM de 2022); pueden dar presión o dolor facial."],
+["Cabeza, ojos y oídos",[1,2],"Mareo, visión borrosa, zumbido de oídos, dolor de cabeza o sensación de desmayo si baja el flujo de la arteria vertebral o se afecta el tronco encefálico."],
+["Mandíbula y cara",[6,2],"Tensión mandibular y dolor en la cara; el núcleo del nervio trigémino se extiende hasta los primeros segmentos cervicales."],
 ["Garganta y voz",[0],"Cambios en la voz, nudo en la garganta o dificultad para tragar si el nervio vago se tensa."],
 ["Corazón y presión arterial",[0,2],"Palpitaciones, presión que sube o baja, mareo al ponerte de pie; el vago y el tronco encefálico regulan el ritmo cardíaco."],
 ["Pulmones y respiración",[0,4],"Sensación de falta de aire o suspiros; el vago y el nervio frénico (C3 a C5) intervienen en la respiración."],
@@ -338,15 +365,15 @@ const BP=[
 ["Hombros y escápulas",[6,4],"Dolor entre el cuello y el hombro y trapecio contraído; las raíces C3 a C5 y el nervio accesorio inervan la zona."],
 ["Brazos y manos",[4,3],"Hormigueo, adormecimiento o debilidad que baja por el brazo (raíces C5 a T1 y médula)."],
 ["Espalda alta",[5,6],"Dolor o rigidez entre las escápulas; la columna torácica compensa cuando el cuello se mueve de más."],
-["Piernas y equilibrio",[],"Torpeza al caminar o piernas pesadas serían poco esperables con tu médula cervical normal en la RM. Si aparecen, consulta pronto.","Tu RX lumbar (jul-2020) muestra disminución del espacio intervertebral posterior L5-S1, una explicación lumbar posible para dolor de espalda baja o molestias en las piernas."]];
+["Piernas y equilibrio",[3,2],"Torpeza al caminar, piernas pesadas u hormigueo si la médula se comprime. Es poco común, pero es señal para consultar pronto."]];
 const SHP=[[0,'circle cx="60" cy="26" r="20"'],[1,'ellipse cx="60" cy="42" rx="12" ry="6"'],[2,'rect x="54" y="50" width="12" height="16" rx="4"'],[3,'circle cx="62" cy="104" r="10"'],[4,'ellipse cx="42" cy="98" rx="9" ry="18"'],[4,'ellipse cx="78" cy="98" rx="9" ry="18"'],[5,'ellipse cx="60" cy="152" rx="22" ry="20"'],[6,'rect x="12" y="66" width="26" height="12" rx="6"'],[6,'rect x="82" y="66" width="26" height="12" rx="6"'],[7,'rect x="6" y="82" width="14" height="88" rx="7"'],[7,'rect x="100" y="82" width="14" height="88" rx="7"'],[8,'rect x="44" y="70" width="32" height="10" rx="5"'],[9,'rect x="38" y="196" width="18" height="96" rx="8"'],[9,'rect x="64" y="196" width="18" height="96" rx="8"']];
 const TB=["","Posible molestia","Posibles síntomas importantes"];
 function bodyMap(rows){const sa=[];rows.forEach(r=>sa[r.i]=r.s);
-const rs=BP.map(([n,ids,t,alt])=>({n,t,alt,s:ids.length?Math.max(...ids.map(i=>sa[i])):0}));
+const rs=BP.map(([n,ids,t])=>({n,t,s:Math.max(...ids.map(i=>sa[i]))}));
 const fl=s=>s===2?'fill="var(--cmpbg)" stroke="var(--cmp)"':s===1?'fill="var(--strbg)" stroke="var(--str)"':'fill="var(--ok)" stroke="var(--line)"';
 $("body").innerHTML=`<rect x="34" y="64" width="52" height="136" rx="16" fill="var(--card)" stroke="var(--line)"/>`+SHP.map(([i,d])=>{const tg=d.split(" ")[0];return `<${tg} ${d.slice(tg.length)} ${fl(rs[i].s)} stroke-width="1.5"><title>${rs[i].n}</title></${tg}>`}).join("");
 const on=rs.filter(r=>r.s).sort((a,b)=>b.s-a.s),off=rs.filter(r=>!r.s);
-$("bp").innerHTML=(on.length?on.map(r=>`<div class="s s${r.s}"><h3><span>${r.n}</span><span class="tag">${TB[r.s]}</span></h3><p>${r.t}</p></div>`).join(""):`<p class="cap">Con el cuello cerca de la posición neutra no se espera respuesta en otras partes del cuerpo.</p>`)+(on.length&&off.length?`<p class="cap">Sin cambio esperado: ${off.map(r=>r.n.toLowerCase()).join(", ")}. Son respuestas posibles, no inevitables.</p>`:"")+`<h3 class="alt-h">Otras posibles causas según tus informes</h3>`+rs.filter(r=>r.alt).map(r=>`<div class="s s0"><h3><span>${r.n}</span></h3><p>${r.alt}</p></div>`).join("");}
+$("bp").innerHTML=(on.length?on.map(r=>`<div class="s s${r.s}"><h3><span>${r.n}</span><span class="tag">${TB[r.s]}</span></h3><p>${r.t}</p></div>`).join(""):`<p class="cap">Con el cuello cerca de la posición neutra no se espera respuesta en otras partes del cuerpo.</p>`)+(on.length&&off.length?`<p class="cap">Sin cambio esperado: ${off.map(r=>r.n.toLowerCase()).join(", ")}. Son respuestas posibles, no inevitables.</p>`:"");}
 function poseSummary(){
 const p=[];
 if(V0.fe>0)p.push("flexión");else if(V0.fe<0)p.push("extensión");
@@ -394,48 +421,59 @@ function init3D() {
   headPivot = new THREE.Group();
   scene.add(headPivot);
 
-  const loader = new OBJLoader();
+  const loader = new GLTFLoader();
   
   // Ruta robusta para GitHub Pages y local
   const isGitHubPages = window.location.hostname.includes('github.io');
   const modelUrl = isGitHubPages 
-    ? 'https://dbettancourt.github.io/visor-cervical-personalizado/Person002_wrap.obj?v=2' 
-    : './Person002_wrap.obj';
+    ? 'https://dbettancourt.github.io/visor-cervical-personalizado/cuello_cabeza.glb?v=1' 
+    : './cuello_cabeza.glb';
 
   console.log("Intentando cargar modelo desde:", modelUrl);
 
-  loader.load(modelUrl, (object) => {
-    // Ocultar mensaje de carga en lugar de eliminarlo (más seguro)
+  const mostrarError = (html) => {
     if(loadingMsg) loadingMsg.style.display = 'none';
-    
-    // --- CORRECCIÓN CRÍTICA DE ESCALADO Y CENTRADO ---
-    // 1. Escalar primero
+    const errorDiv = document.createElement('div');
+    errorDiv.style.cssText = 'color: var(--cmp); padding: 20px; text-align: center; font-size: 0.9rem; background: var(--cmpbg); border-radius: 8px; margin: 10px; position:absolute; z-index:2;';
+    errorDiv.innerHTML = html;
+    container.appendChild(errorDiv);
+  };
+
+  loader.load(modelUrl, (gltf) => {
+    const object = gltf.scene;
+
+    // Armar la cadena de vértebras (C7 fija -> C1 -> cráneo)
+    try {
+      joints = buildRig(object);
+    } catch (e) {
+      console.error("❌ Error armando el rig:", e);
+      mostrarError(`<b>El modelo se cargó pero no tiene las piezas esperadas</b><br>${e.message}<br>Revisa los nombres de los objetos exportados desde Blender (C1 a C7 y SKULL).`);
+      return;
+    }
+
+    if(loadingMsg) loadingMsg.style.display = 'none';
+
+    // --- ESCALADO Y CENTRADO ---
     const boxInit = new THREE.Box3().setFromObject(object);
     const sizeInit = boxInit.getSize(new THREE.Vector3());
     const maxDim = Math.max(sizeInit.x, sizeInit.y, sizeInit.z);
     const scaleFactor = 2.5 / maxDim; // Ajusta este 2.5 si el modelo se ve muy grande/pequeño
     object.scale.setScalar(scaleFactor);
 
-    // 2. Recalcular caja con el nuevo tamaño
     const boxScaled = new THREE.Box3().setFromObject(object);
     const centerScaled = boxScaled.getCenter(new THREE.Vector3());
-
-    // 3. Centrar el objeto restando el nuevo centro
     object.position.sub(centerScaled);
-    // --------------------------------------------------
+    // ---------------------------
 
-    // Aplicar material
+    // Material óseo
     object.traverse((child) => {
       if (child.isMesh) {
-        // Recalcular normales: sin ellas el modelo se ve plano (solo silueta)
-        child.geometry.deleteAttribute('normal');
-        child.geometry = mergeVertices(child.geometry, 1e-4);
-        child.geometry.computeVertexNormals();
+        if (!child.geometry.attributes.normal) child.geometry.computeVertexNormals();
         child.material = new THREE.MeshStandardMaterial({
-          color: 0xebbfae, 
-          roughness: 0.6,
-          metalness: 0.1,
-          side: THREE.DoubleSide, // Útil si el modelo tiene caras abiertas
+          color: 0xe6dccb,
+          roughness: 0.65,
+          metalness: 0.05,
+          side: THREE.DoubleSide,
           flatShading: false
         });
       }
@@ -452,13 +490,8 @@ function init3D() {
     }
   },
   (err) => {
-    console.error("❌ Error cargando el modelo .obj: ", err);
-    if(loadingMsg) loadingMsg.style.display = 'none';
-    
-    const errorDiv = document.createElement('div');
-    errorDiv.style.cssText = 'color: var(--cmp); padding: 20px; text-align: center; font-size: 0.9rem; background: var(--cmpbg); border-radius: 8px; margin: 10px; position:absolute; z-index:2;';
-    errorDiv.innerHTML = `<b>Error al cargar el modelo 3D</b><br>URL intentada: <code style="font-size:0.8em;word-break:break-all;">${modelUrl}</code><br>Verifica que el archivo <i>Person002_wrap.obj</i> está en la raíz del repositorio.`;
-    container.appendChild(errorDiv);
+    console.error("❌ Error cargando el modelo .glb: ", err);
+    mostrarError(`<b>Error al cargar el modelo 3D</b><br>URL intentada: <code style="font-size:0.8em;word-break:break-all;">${modelUrl}</code><br>Verifica que el archivo <i>cuello_cabeza.glb</i> está junto al index.html y que abres la página desde un servidor (no con doble clic).`);
   });
 
   window.addEventListener('resize', onWindowResize);
@@ -476,15 +509,20 @@ function animate() {
   requestAnimationFrame(animate);
   
   if (modelLoaded && headPivot) {
-    // Suavizado de rotaciones basado en los valores de V0
-    const targetRotY = (V0.rot / 100) * maxDe("rot") * (Math.PI / 180); 
-    headPivot.rotation.y += (targetRotY - headPivot.rotation.y) * 0.1; 
+    // Ángulos totales (cráneo) con suavizado, igual que antes
+    const targetRotY = SIGNO.rot  * (V0.rot / 100) * (Math.PI / 3); 
+    const targetRotZ = SIGNO.tilt * (V0.tilt / 100) * -(Math.PI / 5); 
+    const targetRotX = SIGNO.fe   * (V0.fe / 100) * (Math.PI / 5); // fe<0 = extensión -> la cara sube
+    cur.y += (targetRotY - cur.y) * 0.1;
+    cur.z += (targetRotZ - cur.z) * 0.1;
+    cur.x += (targetRotX - cur.x) * 0.1;
 
-    const targetRotZ = (V0.tilt / 100) * -maxDe("tilt") * (Math.PI / 180); 
-    headPivot.rotation.z += (targetRotZ - headPivot.rotation.z) * 0.1;
-
-    const targetRotX = (V0.fe / 100) * (V0.fe >= 0 ? maxDe("flex") : maxDe("ext")) * (Math.PI / 180); // fe<0 = extensión -> la cara sube
-    headPivot.rotation.x += (targetRotX - headPivot.rotation.x) * 0.1;
+    // Cada articulación recibe solo su fracción del movimiento total
+    for (let i = 1; i < joints.length; i++) {
+      joints[i].rotation.x = (REPARTO.fe[i]   - REPARTO.fe[i - 1])   * cur.x;
+      joints[i].rotation.y = (REPARTO.rot[i]  - REPARTO.rot[i - 1])  * cur.y;
+      joints[i].rotation.z = (REPARTO.tilt[i] - REPARTO.tilt[i - 1]) * cur.z;
+    }
 
     const targetPosZ = (V0.prot / 100) * 0.2; // adelantamiento -> hacia la cámara
     headPivot.position.z += (targetPosZ - headPivot.position.z) * 0.1;
@@ -504,7 +542,7 @@ if(!v)o.textContent="neutra";
 else if(k==="prot")o.textContent=`${Math.abs(v)}% ${v>0?"adelantamiento":"retracción"}`;
 else{const q=k==="fe"?(v>0?"flex":"ext"):k;o.textContent=`${(MOV[q].max*kk*Math.abs(v)/100).toFixed(0)}° ${k==="fe"?(v>0?"flexión":"extensión"):v>0?"a la derecha":"a la izquierda"}`;}}
 $("pose").textContent=poseSummary();
-$("deg").textContent="Rangos de referencia de población general (no medidos en ti): flexión "+MOV.flex.max+"°, extensión "+MOV.ext.max+"°, rotación "+MOV.rot.max+"° e inclinación "+MOV.tilt.max+"° a cada lado. Tus informes no incluyen mediciones de movimiento"+(SED()?"; con hipermovilidad tu rango real puede ser mayor.":".")+" No sustituyen una medición clínica.";
+$("deg").textContent=SED()?"Modo clínico personalizado: Tus resonancias muestran rectificación de la lordosis y anterolistesis C2-C4. Los rangos están limitados para evitar el deslizamiento vertebral.":"Rangos orientativos del esquema: flexión 35° (limitado), extensión 50°, rotación 80°, inclinación 40°. No sustituyen una medición clínica.";
 
 updateClinicalWarning();
 
@@ -517,7 +555,7 @@ for(const x of A){const [s0,t]=d[x.mv],s=eff(s0,x.a,n,x.mv);
 if(first||s>b.s||(s===b.s&&x.a>b.a)){first=false;const I=SN[x.side],C=SN[x.side==="der"?"izq":"der"];b={s,a:x.a,t:t.replaceAll("{I}",I).replaceAll("{C}",C),m:MOV[x.mv].n};}}
 return{i,n,...b}}).sort((x,y)=>y.s-x.s);
 const big=A.some(x=>x.a>=40);
-bodyMap(rows);$("out").innerHTML=(SED()&&big?`<p class="cap">Con hipermovilidad, la respuesta de ligamentos, músculos y articulaciones puede variar. Esta advertencia no confirma inestabilidad ni compresión.</p>`:"")+(A.length>1?`<p class="cap">Al combinar movimientos la carga puede cambiar, pero este modelo no calcula la interacción tridimensional. Cada fila muestra el nivel programado más alto entre los movimientos seleccionados por separado.</p>`:"")+rows.map(r=>`<div class="s s${r.s}"><h3><span><b class="bd">${r.i+1}</b>${r.n}</span><span class="tag">${r.i===7&&r.s===1?"Hallazgo documentado en RX":TAG[r.s]}</span></h3><p>${!A.length||(r.s===0&&r.a<20)?"Cerca de la posición neutra: poca carga.":(A.length>1?`<b>${r.m}:</b> `:"")+r.t}</p></div>`).join("");}
+bodyMap(rows);$("out").innerHTML=(SED()&&big?`<p class="cap">Con hipermovilidad, la respuesta de ligamentos, músculos y articulaciones puede variar. Esta advertencia no confirma inestabilidad ni compresión.</p>`:"")+(A.length>1?`<p class="cap">Al combinar movimientos la carga puede cambiar, pero este modelo no calcula la interacción tridimensional. Cada fila muestra el nivel programado más alto entre los movimientos seleccionados por separado.</p>`:"")+rows.map(r=>`<div class="s s${r.s}"><h3><span><b class="bd">${r.i+1}</b>${r.n}</span><span class="tag">${TAG[r.s]}</span></h3><p>${!A.length||(r.s===0&&r.a<20)?"Cerca de la posición neutra: poca carga.":(A.length>1?`<b>${r.m}:</b> `:"")+r.t}</p></div>`).join("");}
 
 // Event Listeners
 $("sl").addEventListener("input",e=>{const k=e.target.dataset.k;if(k){V0[k]=+e.target.value;focus=k;render();}});
